@@ -3,6 +3,11 @@ import './Card.css';
 
 class Card extends Component {
 
+  constructor(props) {
+    super(props);
+    this.onDrag = this.onDrag.bind(this);
+  }
+
   computeSuitName(suit) {
     switch (suit) {
       case 'c':
@@ -19,9 +24,13 @@ class Card extends Component {
     }
   }
 
+  onDrag(e) {
+    e.dataTransfer.setData("text", this.props.colNumber + '/' + this.props.colPosition);
+  }
+
   render() {
     return (
-      <div className="Card">
+      <div className="Card" draggable="true" onDragStart={this.onDrag}>
         <div className="Card-number">{this.props.number}</div>
         <div className={ `suit-icon ${this.computeSuitName(this.props.suit)}` }></div>
       </div>
