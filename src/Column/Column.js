@@ -9,7 +9,7 @@ class Column extends Component {
 
   computePosition(index) {
     return {
-      top: index * 17
+      top: index * 20
     };
   }
 

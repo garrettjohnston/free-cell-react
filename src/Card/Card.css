@@ -1,7 +1,7 @@
 .Card {
   position: relative;
-  width: 24.8px;
-  height: 35px;
+  width: 40px;
+  height: 56px;
   border: 1px solid black;
   border-radius: 3px;
   background-color: white;
@@ -10,34 +10,34 @@
 
 .Card .suit-icon {
   position: absolute;
-  right: 1px;
-  top: 1px;
+  right: 2px;
+  top: 3px;
   background-image: url("../images/suits2.png");
-  background-size: 20px auto;
+  background-size: 24px auto;
   background-repeat: no-repeat;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 
 .Card .suit-icon.spade {
-  background-position: -10px -13px;
+  background-position: -12px -17px;
 }
 
 .Card .suit-icon.club {
-  background-position: -1px -2px;
+  background-position: -1px -3px;
 }
 
 .Card .suit-icon.heart {
-  background-position: -0.5px -13px;
+  background-position: -1px -16px;
 }
 
 .Card .suit-icon.diamond {
-  right: 0;
-  background-position: -10px -2px;
+  background-position: -12px -3px;
 }
 
 .Card-number {
   float: left;
-  font-size: 12px;
-  margin-left: 2px;
+  font-size: 14px;
+  margin-left: 3px;
+  margin-top: 1px;
 }
