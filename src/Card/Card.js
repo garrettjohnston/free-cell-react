@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import {suitShortToFullNameMap} from '../Common.js';
+
 import './Card.css';
 
 class Card extends Component {
@@ -8,31 +10,15 @@ class Card extends Component {
     this.onDrag = this.onDrag.bind(this);
   }
 
-  computeSuitName(suit) {
-    switch (suit) {
-      case 'c':
-        return 'club';
-      case 'h':
-        return 'heart';
-      case 's':
-        return 'spade';
-      case 'd':
-        return 'diamond';
-      default:
-        console.error('Invalid suit type', suit);
-        return '';
-    }
-  }
-
   onDrag(e) {
-    e.dataTransfer.setData("text", this.props.colNumber + '/' + this.props.colPosition);
+    e.dataTransfer.setData("text", this.props.position);
   }
 
   render() {
     return (
       <div className="Card" draggable="true" onDragStart={this.onDrag}>
         <div className="Card-number">{this.props.number}</div>
-        <div className={ `suit-icon ${this.computeSuitName(this.props.suit)}` }></div>
+        <div className={ `suit-icon ${suitShortToFullNameMap[this.props.suit]}` }></div>
       </div>
     );
   }

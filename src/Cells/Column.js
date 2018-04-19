@@ -21,10 +21,8 @@ class Column extends Component {
 
   onDrop(e) {
     e.preventDefault();
-    var data = e.dataTransfer.getData("text");
-    let originalColNumber = data.split('/')[0];
-    let originalColPosition = parseInt(data.split('/')[1], 10);
-    this.props.onAttemptMoveCard(originalColNumber, originalColPosition, this.props.colNumber);
+    var position = e.dataTransfer.getData("text");
+    this.props.onAttemptMoveCard(position, this.props.colNumber);
   }
 
   render() {
@@ -33,11 +31,9 @@ class Column extends Component {
         {this.props.cards.map((card, index) =>
           <div className="Column-positioner" style={this.computePosition(index)} key={card.number + card.suit}>
             <Card
-              colNumber={this.props.colNumber}
-              colPosition={index}
+              position={`COLUMN:${this.props.colNumber}/${index}`}
               suit={card.suit}
-              number={card.number}
-              style={{color: 'red'}}>
+              number={card.number}>
             </Card>
           </div>
         )}

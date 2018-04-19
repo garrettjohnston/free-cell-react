@@ -1,5 +1,7 @@
 .Column {
   position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .Column-positioner {

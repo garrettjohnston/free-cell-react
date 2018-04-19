@@ -1,6 +1,7 @@
 .GameBoard {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: 75px 1fr;
 
   width: 420px;
   height: 420px;
@@ -8,4 +9,26 @@
   margin: 0 auto;
   border: 1px solid black;
   border-radius: 10px;
+}
+
+.GameBoard-Foundation {
+  grid-row: 1 / span 1;
+  grid-column: 1 / span 4;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.GameBoard-OpenCell {
+  grid-row: 1 / span 1;
+  grid-column: 5 / span 4;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.GameBoard-Column {
+  grid-row: 2 / span 1;
+  display: flex;
+  justify-content: center;
 }
