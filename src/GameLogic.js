@@ -11,22 +11,22 @@ const SORTED_DECK = (function() {
   return arr;
 })();
 
-// Get a random dealing of cards and array of 8 arrays (one for each column)
+// Get a random dealing of cards and array of 8 arrays (one for each tableau)
 export function getRandomCardDeal() {
   // Get a new deck and shuffle it
   let newDeck = SORTED_DECK.slice();
   newDeck = shuffleArray(newDeck);
 
-  // Initial card positions is an array of 8 arrays (for each column)
-  let cardColumns = [[], [], [], [], [], [], [], []];
-  let column = 0;
+  // Initial card positions is an array of 8 arrays (for each tableau)
+  let cardTableaux = [[], [], [], [], [], [], [], []];
+  let tableau = 0;
 
-  // Distribute the shuffled deck into the card columns
+  // Distribute the shuffled deck into the card tableaus
   while (newDeck.length > 0) {
-    cardColumns[column].push(newDeck.pop());
-    column = (column >= 7) ? 0 : column + 1;
+    cardTableaux[tableau].push(newDeck.pop());
+    tableau = (tableau >= 7) ? 0 : tableau + 1;
   }
-  return cardColumns;
+  return cardTableaux;
 }
 
 function shuffleArray(array) {
@@ -47,19 +47,19 @@ function shuffleArray(array) {
   return array;
 }
 
-// Check if a given move to a column is going to be valid or not
-export function isValidMoveToColumn(state, position, newColNumber) {
+// Check if a given move to a tableau is going to be valid or not
+export function isValidMoveToTableau(state, position, newTableauNumber) {
   let parsedPosition = parsePosition(position);
 
   if (isValidMoveFromPosition(state, parsedPosition)) {
     let cardToMove = getCardForPosition(state, parsedPosition);
 
     // TODO: Get stack of cards, see if it's legal to drag this many, or maybe do this at onDrag event time
-    let landColumn = state.cardColumns[newColNumber];
-    if (landColumn.length === 0) {
+    let landTableau = state.cardTableaux[newTableauNumber];
+    if (landTableau.length === 0) {
       return true;
     }
-    let cardToLand = landColumn[landColumn.length - 1];
+    let cardToLand = landTableau[landTableau.length - 1];
 
     return areSuitsStackable(cardToLand.suit, cardToMove.suit)
         && areNumbersStackable(cardToLand.number, cardToMove.number);
@@ -67,13 +67,13 @@ export function isValidMoveToColumn(state, position, newColNumber) {
   return false;
 }
 
-// Move a card from one location to another column
-export function executeMoveToColumn(state, position, newColNumber) {
+// Move a card from one location to another tableau
+export function executeMoveToTableau(state, position, newTableauNumber) {
   let newState = Object.assign({}, state);
   let cardToMove = removeCardAtPosition(newState, position);
 
-  // Push card onto end of new column
-  newState.cardColumns[newColNumber].push(cardToMove);
+  // Push card onto end of new tableau
+  newState.cardTableaux[newTableauNumber].push(cardToMove);
 
   return newState;
 }
@@ -136,11 +136,11 @@ export function executeMoveToOpenCell(state, position, openCellNumber) {
 // Parse the position string
 function parsePosition(position) {
   let [stack, stackIndex] = position.split(':');
-  if (stack === 'COLUMN') {
-    let [columnNumber, index] = stackIndex.split('/');
+  if (stack === 'TABLEAU') {
+    let [tableauNumber, index] = stackIndex.split('/');
     return {
-      'stack': 'COLUMN',
-      'stackIndex': parseInt(columnNumber, 10),
+      'stack': 'TABLEAU',
+      'stackIndex': parseInt(tableauNumber, 10),
       'itemIndex': parseInt(index, 10)
     }
   } else {
@@ -153,10 +153,10 @@ function parsePosition(position) {
 
 function isValidMoveFromPosition(state, position) {
   switch (position.stack) {
-    case 'COLUMN':
-      let moveColumn = state.cardColumns[position.stackIndex];
-      // Check if it's the last card in the column
-      if (position.itemIndex !== moveColumn.length - 1) {
+    case 'TABLEAU':
+      let moveTableau = state.cardTableaux[position.stackIndex];
+      // Check if it's the last card in the tableau
+      if (position.itemIndex !== moveTableau.length - 1) {
         return false;
       }
       // More logic here about moving "from", i.e. stacked cards (but maybe put this in onDrag handler)
@@ -175,8 +175,8 @@ function isValidMoveFromPosition(state, position) {
 
 function getCardForPosition(state, position) {
   switch (position.stack) {
-    case 'COLUMN':
-      return state.cardColumns[position.stackIndex][position.itemIndex];
+    case 'TABLEAU':
+      return state.cardTableaux[position.stackIndex][position.itemIndex];
       // More logic here about moving "from", i.e. stacked cards (but maybe put this in onDrag handler)
     case 'FOUNDATION':
       return state.foundationCells[position.stackIndex];
@@ -194,9 +194,9 @@ function removeCardAtPosition(state, position) {
   let cardToMove = getCardForPosition(state, parsedPosition);
 
   switch (parsedPosition.stack) {
-    case 'COLUMN':
+    case 'TABLEAU':
       // TODO: Implement multiple cards removal
-      state.cardColumns[parsedPosition.stackIndex].pop();
+      state.cardTableaux[parsedPosition.stackIndex].pop();
       break;
     case 'FOUNDATION':
       state.foundationCells[parsedPosition.stackIndex] = null;

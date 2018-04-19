@@ -1,9 +1,9 @@
-.Column {
+.Tableau {
   position: relative;
   display: flex;
   justify-content: center;
 }
 
-.Column-positioner {
+.Tableau-positioner {
   position: absolute;
 }

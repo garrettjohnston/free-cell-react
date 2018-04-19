@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Column from './Cells/Column.js';
+import Tableau from './Cells/Tableau.js';
 import FoundationCell from './Cells/FoundationCell.js';
 import OpenCell from './Cells/OpenCell.js';
 import {ALL_SUITS, ALL_NUMBERS} from './Common.js';
@@ -17,7 +17,7 @@ class GameBoard extends Component {
     );
 
     this.onClickDealNewHand = this.onClickDealNewHand.bind(this);
-    this.attemptMoveCardToColumn = this.attemptMoveCardToColumn.bind(this);
+    this.attemptMoveCardToTableau = this.attemptMoveCardToTableau.bind(this);
     this.attemptMoveCardToFoundation = this.attemptMoveCardToFoundation.bind(this);
     this.attemptMoveCardToOpenCell = this.attemptMoveCardToOpenCell.bind(this);
   }
@@ -28,15 +28,15 @@ class GameBoard extends Component {
 
   getNewDealObject() {
     return {
-      cardColumns: gameLogic.getRandomCardDeal(),
+      cardTableaux: gameLogic.getRandomCardDeal(),
       foundationCells: [null, null, null, null],
       openCells: [null, null, null, null]
     };
   }
 
-  attemptMoveCardToColumn(position, newColNumber) {
-    if (gameLogic.isValidMoveToColumn(this.state, position, newColNumber)) {
-      let newState = gameLogic.executeMoveToColumn(this.state, position, newColNumber);
+  attemptMoveCardToTableau(position, newTableauNumber) {
+    if (gameLogic.isValidMoveToTableau(this.state, position, newTableauNumber)) {
+      let newState = gameLogic.executeMoveToTableau(this.state, position, newTableauNumber);
       this.setState(newState);
     }
   }
@@ -82,13 +82,13 @@ class GameBoard extends Component {
             )}
           </div>
 
-          {this.state.cardColumns.map((column, index) =>
-            <Column
+          {this.state.cardTableaux.map((tableau, index) =>
+            <Tableau
               key={index}
-              cards={column}
-              colNumber={index}
-              onAttemptMoveCard={this.attemptMoveCardToColumn}>
-            </Column>
+              cards={tableau}
+              tableauNumber={index}
+              onAttemptMoveCard={this.attemptMoveCardToTableau}>
+            </Tableau>
           )}
         </div>
       </React.Fragment>

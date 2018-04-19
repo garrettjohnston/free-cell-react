@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import Card from '../Card/Card.js';
-import './Column.css';
+import './Tableau.css';
 
-class Column extends Component {
+class Tableau extends Component {
   constructor(props) {
     super(props);
     this.onDragOver = this.onDragOver.bind(this);
@@ -22,16 +22,16 @@ class Column extends Component {
   onDrop(e) {
     e.preventDefault();
     var position = e.dataTransfer.getData("text");
-    this.props.onAttemptMoveCard(position, this.props.colNumber);
+    this.props.onAttemptMoveCard(position, this.props.tableauNumber);
   }
 
   render() {
     return (
-      <div className="Column" onDragOver={this.onDragOver} onDrop={this.onDrop}>
+      <div className="Tableau" onDragOver={this.onDragOver} onDrop={this.onDrop}>
         {this.props.cards.map((card, index) =>
-          <div className="Column-positioner" style={this.computePosition(index)} key={card.number + card.suit}>
+          <div className="Tableau-positioner" style={this.computePosition(index)} key={card.number + card.suit}>
             <Card
-              position={`COLUMN:${this.props.colNumber}/${index}`}
+              position={`TABLEAU:${this.props.tableauNumber}/${index}`}
               suit={card.suit}
               number={card.number}>
             </Card>
@@ -42,4 +42,4 @@ class Column extends Component {
   }
 }
 
-export default Column;
+export default Tableau;

@@ -27,7 +27,7 @@
   justify-content: space-around;
 }
 
-.GameBoard-Column {
+.GameBoard-Tableau {
   grid-row: 2 / span 1;
   display: flex;
   justify-content: center;
