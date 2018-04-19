@@ -9,7 +9,12 @@ import './GameBoard.css';
 class GameBoard extends Component {
   constructor(props) {
     super(props);
-    this.state = this.newDeal();
+    this.state = Object.assign(
+      {
+        maxCardsToMove: 4
+      },
+      this.getNewDealObject()
+    );
 
     this.onClickDealNewHand = this.onClickDealNewHand.bind(this);
     this.attemptMoveCardToColumn = this.attemptMoveCardToColumn.bind(this);
@@ -18,10 +23,10 @@ class GameBoard extends Component {
   }
 
   onClickDealNewHand(e) {
-    this.setState(this.newDeal());
+    this.setState(this.getNewDealObject());
   }
 
-  newDeal() {
+  getNewDealObject() {
     return {
       cardColumns: gameLogic.getRandomCardDeal(),
       foundationCells: [null, null, null, null],
