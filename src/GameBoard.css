@@ -3,7 +3,10 @@
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: 75px 1fr;
 
-  width: 420px;
+  background: url("./images/green-wallpaper.jpg") no-repeat;
+  background-size: 100% 100%;
+
+  width: 400px;
   height: 420px;
   padding: 10px;
   margin: 0 auto;
@@ -12,6 +15,7 @@
 }
 
 .GameBoard-Foundation {
+  margin-right: 10px;
   grid-row: 1 / span 1;
   grid-column: 1 / span 4;
   display: flex;
@@ -20,6 +24,7 @@
 }
 
 .GameBoard-OpenCell {
+  margin-left: 10px;
   grid-row: 1 / span 1;
   grid-column: 5 / span 4;
   display: flex;
