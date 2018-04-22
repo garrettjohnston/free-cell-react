@@ -77,8 +77,8 @@ class GameBoard extends Component {
     // This checks if this left click is actually fired from a Card left click
     if (!e.defaultPrevented) {
       e.preventDefault();
-      // let newState = gameLogic.moveAllPossibleCardsToFoundation(this.state);
-      // this.setState(newState);
+      let newState = gameLogic.moveAllPossibleCardsToFoundation(this.state);
+      this.setState(newState);
     }
   }
 

@@ -1,4 +1,4 @@
-import {ALL_SUITS, ALL_NUMBERS} from './Common.js';
+import {ALL_SUITS, ALL_NUMBERS, suitShortToFullNameMap} from './Common.js';
 
 // A sorted deck of cards
 const SORTED_DECK = (function() {
@@ -68,8 +68,8 @@ export function isValidMoveToTableau(state, position, newTableauNumber) {
 }
 
 // Move a card from one location to another tableau
-export function executeMoveToTableau(state, position, newTableauNumber) {
-  let newState = Object.assign({}, state);
+export function executeMoveToTableau(state, position, newTableauNumber, makeStateCopy=true) {
+  let newState = (makeStateCopy) ? Object.assign({}, state) : state ;
   let cardToMove = removeCardAtPosition(newState, position);
 
   // Push card onto end of new tableau
@@ -99,8 +99,8 @@ export function isValidMoveToFoundation(state, position, foundationNumber) {
 }
 
 // Move a card from one location to a foundation slot
-export function executeMoveToFoundation(state, position, foundationNumber) {
-  let newState = Object.assign({}, state);
+export function executeMoveToFoundation(state, position, foundationNumber, makeStateCopy=true) {
+  let newState = (makeStateCopy) ? Object.assign({}, state) : state ;
   let cardToMove = removeCardAtPosition(newState, position);
 
   // Assign card to the foundation slot
@@ -123,8 +123,8 @@ export function isValidMoveToOpenCell(state, position, openCellNumber) {
 }
 
 // Move a card from one location to an open cell
-export function executeMoveToOpenCell(state, position, openCellNumber) {
-  let newState = Object.assign({}, state);
+export function executeMoveToOpenCell(state, position, openCellNumber, makeStateCopy=true) {
+  let newState = (makeStateCopy) ? Object.assign({}, state) : state ;
   let cardToMove = removeCardAtPosition(newState, position);
 
   // Assign card to the open cell
@@ -133,8 +133,77 @@ export function executeMoveToOpenCell(state, position, openCellNumber) {
   return newState;
 }
 
+export function moveAllPossibleCardsToFoundation(state) {
+  let newState = Object.assign({}, state);
+
+  let uncheckedCards = getPositionsOfAllTopCards(newState);
+  let checkedCards = [];
+
+  // Cycle through all top cards until we have checked all of them
+  while (true) {
+    if (uncheckedCards.length === 0) {
+      return newState;
+    }
+
+    let cardPosition = uncheckedCards.pop()
+    let cardToCheck = getCardForPosition(newState, cardPosition);
+    let foundationNumber = ALL_SUITS.indexOf(cardToCheck.suit);
+
+    // If it is valid to move card to foundation
+    if (isValidMoveToFoundation(newState, cardPosition, foundationNumber)) {
+      // Move card to foundation
+      executeMoveToFoundation(newState, cardPosition, foundationNumber, false);
+
+      // If not last card in tableau, point cardPosition to the one below this card,
+      // and add it to the list of uncheckedCards
+      if (cardPosition.stack === 'TABLEAU' && cardPosition.itemIndex !== 0) {
+        cardPosition.itemIndex--;
+        uncheckedCards.push(cardPosition);
+      }
+
+      // Since we have added a new card to the foundation, must check all checkedCards again
+      uncheckedCards = checkedCards.concat(uncheckedCards);
+      checkedCards = [];
+
+    }
+    // If not possible to move card to foundation, add this card to chekedCards for use later
+    else {
+      checkedCards.push(cardPosition);
+    }
+  }
+}
+
+// Get an array of the parsed positions of all cards on the top of a tableau or in an open cell
+function getPositionsOfAllTopCards(state) {
+  let cardPositions = [];
+  state.cardTableaux
+    .filter(tableau => tableau.length > 0)
+    .forEach((tableau, tableauIndex) => {
+      cardPositions.push({
+        'stack': 'TABLEAU',
+        'stackIndex': tableauIndex,
+        'itemIndex': tableau.length - 1
+      })
+  });
+
+  state.openCells
+    .filter(openCell => openCell != null)
+    .forEach((openCell, openCellIndex) => {
+      cardPositions.push({
+        'stack': 'OPEN',
+        'stackIndex': openCellIndex
+      })
+  });
+  return cardPositions;
+}
+
 // Parse the position string
 function parsePosition(position) {
+  // Check if position is already parsed
+  if (typeof(position) === 'object' && position.hasOwnProperty('stack')) {
+    return position;
+  }
+
   let [stack, stackIndex] = position.split(':');
   if (stack === 'TABLEAU') {
     let [tableauNumber, index] = stackIndex.split('/');
