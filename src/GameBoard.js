@@ -10,16 +10,25 @@ class GameBoard extends Component {
   constructor(props) {
     super(props);
     this.state = Object.assign(
-      {
-        maxCardsToMove: 4
-      },
       this.getNewDealObject()
     );
+
+    this.gameBoard = React.createRef();
 
     this.onClickDealNewHand = this.onClickDealNewHand.bind(this);
     this.attemptMoveCardToTableau = this.attemptMoveCardToTableau.bind(this);
     this.attemptMoveCardToFoundation = this.attemptMoveCardToFoundation.bind(this);
     this.attemptMoveCardToOpenCell = this.attemptMoveCardToOpenCell.bind(this);
+    this.handleDblClickCard = this.handleDblClickCard.bind(this);
+    this.handleLeftClickBoard = this.handleLeftClickBoard.bind(this);
+  }
+
+  componentDidMount() {
+    this.gameBoard.current.addEventListener("double-click-card", this.handleDblClickCard);
+  }
+
+  componentWillUnmount() {
+    this.gameBoard.current.removeEventListener("double-click-card", this.handleDblClickCard);
   }
 
   onClickDealNewHand(e) {
@@ -55,11 +64,30 @@ class GameBoard extends Component {
     }
   }
 
+  handleDblClickCard(e) {
+    let position = e.detail.position;
+    let foundationNumber = ALL_SUITS.indexOf(e.detail.suit);
+    if (gameLogic.isValidMoveToFoundation(this.state, position, foundationNumber)) {
+      let newState = gameLogic.executeMoveToFoundation(this.state, position, foundationNumber);
+      this.setState(newState);
+    }
+  }
+
+  handleLeftClickBoard(e) {
+    // This checks if this left click is actually fired from a Card left click
+    if (!e.defaultPrevented) {
+      e.preventDefault();
+      // let newState = gameLogic.moveAllPossibleCardsToFoundation(this.state);
+      // this.setState(newState);
+    }
+  }
+
   render() {
+    let maxMoveableCards = gameLogic.calculateMaxMoveableCards(this.state.cardTableaux, this.state.openCells);
     return (
       <React.Fragment>
         <button onClick={this.onClickDealNewHand}>Deal new hand!</button>
-        <div className="GameBoard">
+        <div ref={this.gameBoard} className="GameBoard" onContextMenu={this.handleLeftClickBoard}>
           <div className="GameBoard-Foundation">
             {this.state.foundationCells.map((card, index) =>
               <FoundationCell
@@ -87,7 +115,8 @@ class GameBoard extends Component {
               key={index}
               cards={tableau}
               tableauNumber={index}
-              onAttemptMoveCard={this.attemptMoveCardToTableau}>
+              onAttemptMoveCard={this.attemptMoveCardToTableau}
+              attemptMoveToFoundation={this.attemptMoveToFoundation}>
             </Tableau>
           )}
         </div>
