@@ -176,24 +176,24 @@ export function moveAllPossibleCardsToFoundation(state) {
 // Get an array of the parsed positions of all cards on the top of a tableau or in an open cell
 function getPositionsOfAllTopCards(state) {
   let cardPositions = [];
-  state.cardTableaux
-    .filter(tableau => tableau.length > 0)
-    .forEach((tableau, tableauIndex) => {
+  state.cardTableaux.forEach((tableau, tableauIndex) => {
+    if (tableau.length !== 0)
       cardPositions.push({
         'stack': 'TABLEAU',
         'stackIndex': tableauIndex,
         'itemIndex': tableau.length - 1
       })
-  });
+    }
+  );
 
-  state.openCells
-    .filter(openCell => openCell != null)
-    .forEach((openCell, openCellIndex) => {
+  state.openCells.forEach((openCell, openCellIndex) => {
+    if (openCell !== null)
       cardPositions.push({
         'stack': 'OPEN',
         'stackIndex': openCellIndex
       })
   });
+
   return cardPositions;
 }
 
