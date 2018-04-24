@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Tableau from './Cells/Tableau.js';
 import FoundationCell from './Cells/FoundationCell.js';
 import OpenCell from './Cells/OpenCell.js';
-import {ALL_SUITS, ALL_NUMBERS} from './Common.js';
+import {ALL_SUITS} from './Common.js';
 import * as gameLogic from './GameLogic.js';
 import './GameBoard.css';
 
@@ -115,6 +115,7 @@ class GameBoard extends Component {
               key={index}
               cards={tableau}
               tableauNumber={index}
+              maxMoveableCards={maxMoveableCards}
               onAttemptMoveCard={this.attemptMoveCardToTableau}
               attemptMoveToFoundation={this.attemptMoveToFoundation}>
             </Tableau>

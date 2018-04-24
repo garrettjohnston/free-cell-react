@@ -28,9 +28,10 @@ class Card extends Component {
   }
 
   render() {
+    let selectableClass = (this.props.isSelectable) ? 'selectable' : '';
     return (
       <div
-          className="Card"
+          className={`Card ${selectableClass}`}
           draggable="true"
           onDragStart={this.onDrag}
           onDoubleClick={this.onDoubleClick}

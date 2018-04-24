@@ -1,4 +1,4 @@
-import {ALL_SUITS, ALL_NUMBERS, suitShortToFullNameMap} from './Common.js';
+import {ALL_SUITS, ALL_NUMBERS} from './Common.js';
 
 // A sorted deck of cards
 const SORTED_DECK = (function() {
@@ -282,7 +282,7 @@ function removeCardAtPosition(state, position) {
 
 // Helper function takes two suits and returns true if they are opposite colors
 // and thus are allowed to be stacked
-function areSuitsStackable(suit1, suit2) {
+export function areSuitsStackable(suit1, suit2) {
   switch (suit1) {
     case 'h':
     case 'd':
@@ -298,7 +298,19 @@ function areSuitsStackable(suit1, suit2) {
 
 // Helper function takes two number and returns true if they are sequential
 // and thus are allowed to be stacked
-function areNumbersStackable(numberHigher, numberLower) {
+export function areNumbersStackable(numberHigher, numberLower) {
   return ALL_NUMBERS.indexOf(numberLower) !== 12
       && ALL_NUMBERS.indexOf(numberLower) === ALL_NUMBERS.indexOf(numberHigher) - 1;
+}
+
+export function calculateMaxMoveableCards(cardTableaux, openCells) {
+  let numEmptyTableaux = cardTableaux
+                              .map(tableau => tableau.length)
+                              .filter(length => length === 0)
+                              .length;
+  let numEmptyOpenCells = openCells
+                              .filter(openCell => openCell === null)
+                              .length;
+
+  return (1 + numEmptyOpenCells) * (2 ** numEmptyTableaux);
 }

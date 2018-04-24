@@ -27,7 +27,8 @@ class OpenCell extends Component {
           <Card
             position={`OPEN:${this.props.openCellNumber}`}
             suit={this.props.card.suit}
-            number={this.props.card.number}>
+            number={this.props.card.number}
+            isSelectable={true}>
           </Card>
         ) : (
           <div className="empty-cell"></div>
