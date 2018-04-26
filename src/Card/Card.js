@@ -12,7 +12,12 @@ class Card extends Component {
   }
 
   onDrag(e) {
-    e.dataTransfer.setData("text", this.props.position);
+    if (this.props.isSelectable) {
+      e.dataTransfer.setData("text", this.props.position);
+    } else {
+      // Don't show drag "ghost" image unless card is moveable
+      e.preventDefault();
+    }
   }
 
   onDoubleClick(e) {
