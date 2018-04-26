@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Card from '../Card/Card.js';
 import {areSuitsStackable, areNumbersStackable} from '../GameLogic.js';
+import './Cell.css';
 import './Tableau.css';
 
 class Tableau extends Component {
@@ -65,6 +66,7 @@ class Tableau extends Component {
 
     return (
       <div className="Tableau" onDragOver={this.onDragOver} onDrop={this.onDrop}>
+        <div className="empty-cell"></div>
         {this.props.cards.map((card, index) =>
           <div className="Tableau-positioner" style={this.computePosition(index)} key={card.number + card.suit}>
             <Card
