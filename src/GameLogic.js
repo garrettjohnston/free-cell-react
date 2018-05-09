@@ -51,18 +51,27 @@ function shuffleArray(array) {
 export function isValidMoveToTableau(state, position, newTableauNumber) {
   let parsedPosition = parsePosition(position);
 
-  if (isValidMoveFromPosition(state, parsedPosition)) {
+  if (isValidMoveFromPosition(state, parsedPosition, false)) {
     let cardToMove = getCardForPosition(state, parsedPosition);
 
-    // TODO: Get stack of cards, see if it's legal to drag this many, or maybe do this at onDrag event time
     let landTableau = state.cardTableaux[newTableauNumber];
-    if (landTableau.length === 0) {
-      return true;
-    }
-    let cardToLand = landTableau[landTableau.length - 1];
 
-    return areSuitsStackable(cardToLand.suit, cardToMove.suit)
-        && areNumbersStackable(cardToLand.number, cardToMove.number);
+    // If tableau is empty, calc max moveable cards less one tableau
+    if (landTableau.length === 0) {
+      if (parsedPosition.stack === "FOUNDATION" || parsedPosition.stack === "OPEN") {
+        return true;
+      } else {
+        let maxMoveableCards = calculateMaxMoveableCardsToEmptyTableau(state.cardTableaux, state.openCells);
+        let cardDepth = state.cardTableaux[parsedPosition.stackIndex].length - parsedPosition.itemIndex;
+        return cardDepth <= maxMoveableCards;
+      }
+    }
+    // If tableau has cards already, make sure they match up
+    else {
+      let cardToLand = landTableau[landTableau.length - 1];
+
+      return areCardsStackable(cardToLand, cardToMove);
+    }
   }
   return false;
 }
@@ -70,10 +79,10 @@ export function isValidMoveToTableau(state, position, newTableauNumber) {
 // Move a card from one location to another tableau
 export function executeMoveToTableau(state, position, newTableauNumber, makeStateCopy=true) {
   let newState = (makeStateCopy) ? Object.assign({}, state) : state ;
-  let cardToMove = removeCardAtPosition(newState, position);
+  let cardsToMove = removeCardsAtPosition(newState, position);
 
   // Push card onto end of new tableau
-  newState.cardTableaux[newTableauNumber].push(cardToMove);
+  newState.cardTableaux[newTableauNumber].push(...cardsToMove);
 
   return newState;
 }
@@ -82,7 +91,7 @@ export function executeMoveToTableau(state, position, newTableauNumber, makeStat
 export function isValidMoveToFoundation(state, position, foundationNumber) {
   let parsedPosition = parsePosition(position);
 
-  if (isValidMoveFromPosition(state, parsedPosition)) {
+  if (isValidMoveFromPosition(state, parsedPosition, true)) {
     let cardToMove = getCardForPosition(state, parsedPosition);
     let foundationCard = state.foundationCells[foundationNumber];
 
@@ -101,10 +110,10 @@ export function isValidMoveToFoundation(state, position, foundationNumber) {
 // Move a card from one location to a foundation slot
 export function executeMoveToFoundation(state, position, foundationNumber, makeStateCopy=true) {
   let newState = (makeStateCopy) ? Object.assign({}, state) : state ;
-  let cardToMove = removeCardAtPosition(newState, position);
+  let cardsToMove = removeCardsAtPosition(newState, position);
 
   // Assign card to the foundation slot
-  newState.foundationCells[foundationNumber] = cardToMove;
+  newState.foundationCells[foundationNumber] = cardsToMove[0];
 
   return newState;
 }
@@ -113,7 +122,7 @@ export function executeMoveToFoundation(state, position, foundationNumber, makeS
 export function isValidMoveToOpenCell(state, position, openCellNumber) {
   let parsedPosition = parsePosition(position);
 
-  if (isValidMoveFromPosition(state, parsedPosition)) {
+  if (isValidMoveFromPosition(state, parsedPosition, true)) {
     let openCellCard = state.openCells[openCellNumber];
 
     // Check if open cell is empty
@@ -125,10 +134,10 @@ export function isValidMoveToOpenCell(state, position, openCellNumber) {
 // Move a card from one location to an open cell
 export function executeMoveToOpenCell(state, position, openCellNumber, makeStateCopy=true) {
   let newState = (makeStateCopy) ? Object.assign({}, state) : state ;
-  let cardToMove = removeCardAtPosition(newState, position);
+  let cardsToMove = removeCardsAtPosition(newState, position);
 
   // Assign card to the open cell
-  newState.openCells[openCellNumber] = cardToMove;
+  newState.openCells[openCellNumber] = cardsToMove[0];
 
   return newState;
 }
@@ -220,26 +229,50 @@ function parsePosition(position) {
   }
 }
 
-function isValidMoveFromPosition(state, position) {
+function isValidMoveFromPosition(state, position, topCardOnly=false) {
   switch (position.stack) {
     case 'TABLEAU':
       let moveTableau = state.cardTableaux[position.stackIndex];
-      // Check if it's the last card in the tableau
-      if (position.itemIndex !== moveTableau.length - 1) {
-        return false;
+      let maxMoveableCards = calculateMaxMoveableCards(state.cardTableaux, state.openCells);
+
+      // If move is valid only if it is the top card, check here and return
+      if (topCardOnly) {
+        return position.itemIndex === moveTableau.length - 1;
       }
-      // More logic here about moving "from", i.e. stacked cards (but maybe put this in onDrag handler)
-      return true;
+
+      return areTableauCardsMoveable(moveTableau, maxMoveableCards, position);
+
     // Initially, you cannot move cards down from the foundation
     case 'FOUNDATION':
       return false;
+
     // You can move a card from an open cell if there exists a card in it
     case "OPEN":
       return state.openCells[position.stackIndex] !== null;
+
     default:
       console.error(`Invalid stack type: ${position.stack}`);
       return false;
   }
+}
+
+// For given tableau and card position, returns true if valid to move stack of cards starting at card position
+function areTableauCardsMoveable(tableau, maxMoveableCards, position) {
+  let cardDepth = tableau.length - position.itemIndex;
+
+  if (cardDepth > maxMoveableCards) {
+    return false;
+  }
+
+  // Check that for each card, the one below it is valid (i.e. one number less and opposite suit color)
+  for (var i = position.itemIndex; i < tableau.length - 1; i++) {
+    let cardAbove = tableau[i];
+    let cardBelow = tableau[i + 1];
+    if (!areCardsStackable(cardAbove, cardBelow)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function getCardForPosition(state, position) {
@@ -258,26 +291,33 @@ function getCardForPosition(state, position) {
 }
 
 // Given a game state, remove a card at position and return it
-function removeCardAtPosition(state, position) {
+function removeCardsAtPosition(state, position) {
   let parsedPosition = parsePosition(position);
   let cardToMove = getCardForPosition(state, parsedPosition);
 
   switch (parsedPosition.stack) {
+    // For a tableau, remove all cards below position and return as array
     case 'TABLEAU':
-      // TODO: Implement multiple cards removal
-      state.cardTableaux[parsedPosition.stackIndex].pop();
-      break;
+      let allCardsToMove = [];
+      do {
+        var currentCard = state.cardTableaux[parsedPosition.stackIndex].pop();
+        allCardsToMove.push(currentCard);
+      } while (currentCard !== cardToMove);
+
+      return allCardsToMove.reverse();
+
     case 'FOUNDATION':
       state.foundationCells[parsedPosition.stackIndex] = null;
-      break;
+      return [cardToMove];
+
     case "OPEN":
       state.openCells[parsedPosition.stackIndex] = null;
-      break;
+      return [cardToMove];
+
     default:
       console.error(`Invalid stack type: ${parsedPosition.stack}`);
-      break;
+      return [null];
   }
-  return cardToMove;
 }
 
 // Helper function takes two suits and returns true if they are opposite colors
@@ -303,14 +343,37 @@ export function areNumbersStackable(numberHigher, numberLower) {
       && ALL_NUMBERS.indexOf(numberLower) === ALL_NUMBERS.indexOf(numberHigher) - 1;
 }
 
+export function areCardsStackable(baseCard, cardToStack) {
+  if (baseCard == null) {
+    return true;
+  }
+
+  return areSuitsStackable(baseCard.suit, cardToStack.suit)
+      && areNumbersStackable(baseCard.number, cardToStack.number);
+}
+
 export function calculateMaxMoveableCards(cardTableaux, openCells) {
   let numEmptyTableaux = cardTableaux
-                              .map(tableau => tableau.length)
-                              .filter(length => length === 0)
-                              .length;
+                          .map(tableau => tableau.length)
+                          .filter(length => length === 0)
+                          .length;
   let numEmptyOpenCells = openCells
-                              .filter(openCell => openCell === null)
-                              .length;
+                          .filter(openCell => openCell === null)
+                          .length;
 
   return (1 + numEmptyOpenCells) * (2 ** numEmptyTableaux);
+}
+
+
+
+function calculateMaxMoveableCardsToEmptyTableau(cardTableaux, openCells) {
+  let numEmptyTableaux = cardTableaux
+                          .map(tableau => tableau.length)
+                          .filter(length => length === 0)
+                          .length;
+  let numEmptyOpenCells = openCells
+                          .filter(openCell => openCell === null)
+                          .length;
+
+  return (1 + numEmptyOpenCells) * (2 ** Math.max(0, numEmptyTableaux - 1));
 }
