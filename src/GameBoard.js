@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Tableau from './Cells/Tableau.js';
 import FoundationCell from './Cells/FoundationCell.js';
 import OpenCell from './Cells/OpenCell.js';
+import VictoryBanner from './VictoryBanner.js';
 import {ALL_SUITS} from './Common.js';
 import * as gameLogic from './GameLogic.js';
 import './GameBoard.css';
@@ -84,6 +85,7 @@ class GameBoard extends Component {
 
   render() {
     let maxMoveableCards = gameLogic.calculateMaxMoveableCards(this.state.cardTableaux, this.state.openCells);
+    let isVictorious = gameLogic.checkIfVictorious(this.state.foundationCells);
     return (
       <React.Fragment>
         <button onClick={this.onClickDealNewHand}>Deal new hand!</button>
@@ -120,6 +122,10 @@ class GameBoard extends Component {
               attemptMoveToFoundation={this.attemptMoveToFoundation}>
             </Tableau>
           )}
+
+          {isVictorious &&
+            <VictoryBanner></VictoryBanner>
+          }
         </div>
       </React.Fragment>
     );

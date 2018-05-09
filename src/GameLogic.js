@@ -377,3 +377,8 @@ function calculateMaxMoveableCardsToEmptyTableau(cardTableaux, openCells) {
 
   return (1 + numEmptyOpenCells) * (2 ** Math.max(0, numEmptyTableaux - 1));
 }
+
+// Checks if the game state is a Win by examining the foundation cells
+export function checkIfVictorious(foundationCells) {
+  return foundationCells.every(card => card && card.number === 'K');
+}
